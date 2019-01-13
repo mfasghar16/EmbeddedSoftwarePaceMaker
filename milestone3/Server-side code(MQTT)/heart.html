@@ -1,0 +1,104 @@
+<!doctype html>
+<html class="no-js" lang="">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <title>CIS 441</title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
+  <link rel="stylesheet" type="text/css" href="/static/main.css">
+</head>
+
+<body>
+
+  <!--[if lte IE 9]>
+    <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience and security.</p>
+  <![endif]-->
+
+  <!-- Add your site or application content here -->
+  <i class="fa fa-heart fa-beat" style="font-size:100px;color:#e74c3c;"></i>
+
+  <canvas id="myChart"></canvas>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"></script>
+
+
+  <script>
+         $(document).ready(function() {
+
+         	var socket = io.connect('https://' + document.domain + ':' + location.port + '/test');
+    		socket.on('my response', function(msg) {
+        		console.log(msg.data);
+    		});
+
+    		socket.on('connect', function() {
+        		console.log('Websocket connected!');
+    		});
+
+    		socket.on('connect_error', function() {
+        		console.log("socket error!");
+    		});
+
+
+
+            var data = [];
+            var labels = [];
+
+            {% for result in results %}
+            	data.push({{result[1]}});
+            	labels.push("{{result[0]}}");
+
+            {% endfor %}
+
+            console.log(data);
+            console.log(labels);
+
+            var ctx = document.getElementById("myChart").getContext('2d');
+
+            var chart = new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: labels,
+                                datasets: [{
+                                    fillColor: "rgba(231, 76, 60, 0.4)",
+                					strokeColor: "rgba(231, 76, 60, 1.0)",
+                					pointColor: "rgba(255,255,255, 1)",
+                					pointStrokeColor: "#fff",
+                					pointHighlightFill: "#fff",
+                					pointHighlightStroke: "rgba(231, 76, 60,1.0)",
+                                    data: data,
+                                    label: 'mbed',
+                                    fill: true
+                                }]
+                            },
+                            options: {
+                                title: {
+                                    text: "AVG_HR",
+                                    display: true
+                                },
+                                maintainAspectRatio: false,
+                                spanGaps: false,
+                                elements: {
+                                    line: {
+                                        tension: 0.000001
+                                    }
+                                },
+                                plugins: {
+                                    filler: {
+                                        propagate: false
+                                    }
+                                }
+                            }
+                        });
+
+           
+
+         });
+  </script>
+</body>
+</html>

@@ -1,0 +1,5 @@
+Flask==1.0.2
+Flask-MQTT==1.0.5
+Flask-SocketIO==3.1.1
+google-cloud-pubsub==0.39.0
+google-cloud-bigquery==1.8.0
