@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
+<nta>
+	<declaration>//Global declarations
+chan sense, pace;
+
+int minimumWaitTime = 600;
+int maximumWaitTime = 1400;
+
+</declaration>
+	<template>
+		<name x="5" y="5">Heart</name>
+		<declaration>//Heart declarations
+clock y;</declaration>
+		<location id="id0" x="0" y="0">
+			<name x="-68" y="-8">Waiting</name>
+			<label kind="invariant" x="17" y="-8">y &lt;= maximumWaitTime</label>
+		</location>
+		<init ref="id0"/>
+		<transition>
+			<source ref="id0"/>
+			<target ref="id0"/>
+			<label kind="synchronisation" x="34" y="68">pace?</label>
+			<label kind="assignment" x="34" y="85">y = 0</label>
+			<nail x="-51" y="127"/>
+			<nail x="42" y="127"/>
+		</transition>
+		<transition>
+			<source ref="id0"/>
+			<target ref="id0"/>
+			<label kind="guard" x="25" y="-93">y &gt;= minimumWaitTime</label>
+			<label kind="synchronisation" x="25" y="-127">sense!</label>
+			<label kind="assignment" x="25" y="-110">y = 0</label>
+			<nail x="-42" y="-136"/>
+			<nail x="26" y="-135"/>
+		</transition>
+	</template>
+	<template>
+		<name>VentricleControl</name>
+		<declaration>//VentricleControl(PaceMaker) Declarations
+clock x;
+
+const int LRI = 1000;
+const int HRI = 1200;
+const int [150,500] VRP = 300;
+
+int RateInterval = 1;
+
+bool hyster = false;
+bool prevHyster = false;
+bool operating = false;
+</declaration>
+		<location id="id1" x="170" y="-85">
+			<name x="187" y="-93">WaitVRP</name>
+			<label kind="invariant" x="187" y="-76">x &lt;= VRP</label>
+		</location>
+		<location id="id2" x="-178" y="-85">
+			<name x="-280" y="-93">WaitInterval</name>
+			<label kind="invariant" x="-314" y="-76">x &lt;= RateInterval</label>
+		</location>
+		<init ref="id2"/>
+		<transition>
+			<source ref="id1"/>
+			<target ref="id2"/>
+			<label kind="guard" x="-85" y="-17">x &gt;= VRP</label>
+			<label kind="assignment" x="-85" y="-34">prevHyster = hyster, operating = true</label>
+			<nail x="170" y="-34"/>
+			<nail x="-178" y="-34"/>
+		</transition>
+		<transition>
+			<source ref="id2"/>
+			<target ref="id1"/>
+			<label kind="synchronisation" x="-161" y="-102">sense?</label>
+			<label kind="assignment" x="-110" y="-110">x = 0, RateInterval = HRI, hyster = true</label>
+			<nail x="136" y="-85"/>
+			<nail x="153" y="-85"/>
+		</transition>
+		<transition>
+			<source ref="id2"/>
+			<target ref="id1"/>
+			<label kind="guard" x="-127" y="-187">x &gt;= RateInterval</label>
+			<label kind="synchronisation" x="-170" y="-170">pace!</label>
+			<label kind="assignment" x="-127" y="-170">x = 0, RateInterval = LRI, hyster = false</label>
+			<nail x="-178" y="-153"/>
+			<nail x="170" y="-153"/>
+		</transition>
+	</template>
+	<system>// Place template instantiations here.
+RandHeart = Heart();
+PaceMaker = VentricleControl();
+// List one or more processes to be composed into a system.
+system RandHeart, PaceMaker;
+    </system>
+	<queries>
+		<query>
+			<formula>A[] (!PaceMaker.prevHyster imply PaceMaker.x &lt;= PaceMaker.LRI)
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>A[] (PaceMaker.prevHyster imply PaceMaker.x &lt;= PaceMaker.HRI)
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>A[] ((PaceMaker.WaitInterval &amp;&amp; PaceMaker.operating) imply PaceMaker.x &gt;= PaceMaker.VRP)
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>A[] (!PaceMaker.operating imply PaceMaker.x &lt;= PaceMaker.VRP)
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>A[] (PaceMaker.hyster imply PaceMaker.x &lt;= PaceMaker.RateInterval)
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>A[] not deadlock
+			</formula>
+			<comment>
+			</comment>
+		</query>
+	</queries>
+</nta>
